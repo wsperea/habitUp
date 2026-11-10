@@ -163,54 +163,54 @@ body.light-mode .ghost { border-color: #D1D5DB !important; color: #111827 !impor
 body.light-mode .ghost:hover { background: #F3F4F6 !important; }
 body.light-mode .av { color: #FFFFFF !important; }
 
+/* ===== AVATAR ANIMADO ===== */
 .avatar-wrap { width: 100%; max-width: 300px; margin: 0 auto; cursor: pointer; }
 .avatar-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
 
-/* flotar / respirar */
-.av-body { animation: av-bob 3s ease-in-out infinite; transform-box: view-box; transform-origin: 100px 250px; }
+.av-body { animation: av-bob 3s ease-in-out infinite; transform-box: view-box; transform-origin: 150px 372px; }
 @keyframes av-bob {
   0%, 100% { transform: translateY(0) scaleY(1); }
-  50%      { transform: translateY(-4px) scaleY(1.01); }
+  50%      { transform: translateY(-5px) scaleY(1.008); }
 }
 
-/* cabeza con ligero balanceo */
-.av-head { animation: av-tilt 5s ease-in-out infinite; transform-box: view-box; transform-origin: 100px 105px; }
+.av-head { animation: av-tilt 5s ease-in-out infinite; transform-box: view-box; transform-origin: 150px 150px; }
 @keyframes av-tilt {
   0%, 100% { transform: rotate(-2deg); }
   50%      { transform: rotate(2deg); }
 }
 
-/* parpadeo */
 .av-eye { animation: av-blink 4.5s infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes av-blink {
   0%, 92%, 100% { transform: scaleY(1); }
   95%           { transform: scaleY(0.1); }
 }
 
-/* pulgar arriba */
-.av-arm { animation: av-thumb 2.4s ease-in-out infinite; transform-box: view-box; transform-origin: 147px 128px; }
+.av-arm { animation: av-thumb 2.4s ease-in-out infinite; transform-box: view-box; transform-origin: 198px 180px; }
 @keyframes av-thumb {
-  0%, 100% { transform: rotate(-6deg); }
-  50%      { transform: rotate(6deg); }
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(5deg); }
 }
 
-/* resplandor */
-.av-glow { animation: av-pulse 3.5s ease-in-out infinite; transform-box: view-box; transform-origin: 100px 140px; }
+.av-glow { animation: av-pulse 3.5s ease-in-out infinite; transform-box: view-box; transform-origin: 150px 200px; }
 @keyframes av-pulse {
   0%, 100% { transform: scale(1);    opacity: .85; }
-  50%      { transform: scale(1.06); opacity: 1; }
+  50%      { transform: scale(1.05); opacity: 1; }
 }
 
-/* salto (al tocar o al completar todo) */
+.av-ring { transform-box: view-box; transform-origin: 150px 200px; }
+.av-ring1 { animation: av-spin 16s linear infinite; }
+.av-ring2 { animation: av-spin 24s linear infinite reverse; }
+@keyframes av-spin { to { transform: rotate(360deg); } }
+
 .avatar-wrap.jump .av-body { animation: av-jump .7s ease-out 1; }
 @keyframes av-jump {
   0%   { transform: translateY(0) scale(1, 1); }
   25%  { transform: translateY(0) scale(1.05, .93); }
-  55%  { transform: translateY(-26px) scale(.97, 1.04); }
+  55%  { transform: translateY(-30px) scale(.97, 1.04); }
   80%  { transform: translateY(0) scale(1.05, .94); }
   100% { transform: translateY(0) scale(1, 1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .av-body, .av-head, .av-eye, .av-arm, .av-glow { animation: none !important; }
+  .av-body, .av-head, .av-eye, .av-arm, .av-glow, .av-ring { animation: none !important; }
 }
