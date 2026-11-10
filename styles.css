@@ -222,3 +222,4 @@ body.light-mode .av { color: #FFFFFF !important; }
 }
 .form-error[hidden] { display: none; }
 input.invalido { border-color: #FF6B6B !important; }
+.form-error.form-ok { color: #3DDC97; }
