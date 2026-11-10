@@ -5,13 +5,16 @@ document.getElementById('btn-cerrar-sesion').addEventListener('click', () => win
 
 async function cargarEstadisticas() {
   try {
-    const res = await fetch('/api/registros/semana');
-    const data = await res.json();
+    // 1. Cargar gráfico de barras semanales
+    const resSemana = await fetch('/api/registros/semana');
+    if (!resSemana.ok) throw new Error('Error al cargar semana');
+    const dataSemana = await resSemana.json();
+    
     const contenedor = document.getElementById('grafico-semana');
     contenedor.innerHTML = ''; 
 
     const nombresDias = { 1: 'Lu', 2: 'Ma', 3: 'Mi', 4: 'Ju', 5: 'Vi', 6: 'Sá', 0: 'Do' };
-    const dataOrdenada = [...data].sort((a, b) => {
+    const dataOrdenada = [...dataSemana].sort((a, b) => {
       const diaA = new Date(a.fecha + 'T12:00:00Z').getDay();
       const diaB = new Date(b.fecha + 'T12:00:00Z').getDay();
       return (diaA === 0 ? 7 : diaA) - (diaB === 0 ? 7 : diaB);
@@ -39,38 +42,55 @@ async function cargarEstadisticas() {
     document.getElementById('resumen-semana').textContent = `Total de la semana: ${totalCompletados} hábitos completados`;
     document.querySelector('[data-ui="stat-completed"]').textContent = `${totalCompletados}`;
 
+    // 2. Cargar Racha
     const resRacha = await fetch('/api/registros/racha');
     const dataRacha = await resRacha.json();
     document.querySelector('[data-ui="stat-streak"]').textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
 
+    // 3. Cargar XP
     const resNivel = await fetch('/api/registros/nivel');
     const dataNivel = await resNivel.json();
     document.querySelector('[data-ui="stat-xp"]').textContent = dataNivel.xpTotal;
 
+    // 4. Cargar Progreso Semanal (Anillo) - CORREGIDO
+    // Necesitamos los hábitos activos para calcular el "esperado"
+    const resHabitos = await fetch('/api/habitos');
+    const habitos = await resHabitos.json();
+    const habitosActivos = habitos.filter(h => h.activo !== false);
+
+    let esperados = 0;
+    const nombresDiasCompletos = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    
+    dataSemana.forEach(dia => {
+      const nombreDia = nombresDiasCompletos[new Date(dia.fecha + 'T12:00:00Z').getDay()];
+      // Contamos cuántos hábitos debían hacerse ese día
+      esperados += habitosActivos.filter(h => {
+        if (!h.frecuencia || !h.frecuencia.dias || h.frecuencia.dias.length === 0) return true;
+        return h.frecuencia.dias.includes(nombreDia);
+      }).length;
+    });
+
+    const porcentaje = esperados === 0 ? 0 : Math.min(100, Math.round((totalCompletados / esperados) * 100));
+
+    // Actualizamos el HTML del anillo (asegúrate de que estos data-ui coincidan con tu HTML)
+    const summaryEl = document.querySelector('[data-ui="progress-summary"]');
+    const pctEl = document.querySelector('[data-ui="progress-ring-text"]');
+    const arcEl = document.querySelector('[data-ui="progress-ring-arc"]');
+
+    if (summaryEl) summaryEl.textContent = `${totalCompletados} de ${esperados} hábitos esta semana`;
+    if (pctEl) pctEl.textContent = `${porcentaje}%`;
+    if (arcEl) {
+      arcEl.setAttribute('stroke-dasharray', `${porcentaje} 100`);
+      // Cambiar color del anillo según el progreso
+      if (porcentaje < 30) arcEl.setAttribute('stroke', '#FF6B6B');
+      else if (porcentaje < 70) arcEl.setAttribute('stroke', '#FFB547');
+      else arcEl.setAttribute('stroke', '#3DDC97');
+    }
+
   } catch (error) {
-    console.error(error);
+    console.error("Error cargando estadísticas:", error);
     document.getElementById('grafico-semana').innerHTML = '<p class="mu">Error al cargar la gráfica</p>';
   }
 }
 
-async function cargarExito() {
-  try {
-    const res = await fetch('/api/registros/exito');
-    const data = await res.json();
-    
-    document.querySelector('[data-ui="progress-summary"]').textContent = `${data.completados} de ${data.totalEsperado} hábitos esta semana`;
-    const porcentaje = data.porcentaje;
-    document.querySelector('[data-ui="progress-ring-text"]').textContent = `${porcentaje}%`;
-    document.querySelector('[data-ui="progress-ring-arc"]').setAttribute('stroke-dasharray', `${porcentaje} 100`);
-    
-    const arc = document.querySelector('[data-ui="progress-ring-arc"]');
-    if (porcentaje < 30) arc.setAttribute('stroke', '#FF6B6B');
-    else if (porcentaje < 70) arc.setAttribute('stroke', '#FFB547');
-    else arc.setAttribute('stroke', '#3DDC97');
-  } catch (error) {
-    console.error("Error cargando el éxito:", error);
-  }
-}
-
 cargarEstadisticas();
-cargarExito();
