@@ -7,7 +7,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 export async function connectDb() {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      family: 4 // Forzar IPv4, que a veces ayuda en Render
+      family: 4
     });
     console.log('[habitup] MongoDB conectado exitosamente.');
   } catch (error) {
@@ -18,6 +18,16 @@ export async function connectDb() {
 
 export async function disconnectDb() {
   await mongoose.disconnect();
+}
+
+// FUNCIONES RESTAURADAS para que health.js no falle
+export function dbState() {
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  return states[mongoose.connection.readyState] || 'unknown';
+}
+
+export function isDbReady() {
+  return mongoose.connection.readyState === 1;
 }
 
 export function describeDbError(err) {
