@@ -1,10 +1,15 @@
 import { inicializarApp } from './comun.js';
+import { iniciarAvatar, avatarReaccionar } from './avatar.js';
+
 inicializarApp();
+iniciarAvatar();
 
-console.log('[index.js] v3 cargado');
+console.log('[index.js] versión con data-ui y avatar cargada');
 
+// No falla si el botón no existe
 document.getElementById('btn-cerrar-sesion')?.addEventListener('click', () => window.cerrarSesion());
 
+// Busca por data-ui y, si no está, por id
 const $ui = (nombre, id) =>
   document.querySelector(`[data-ui="${nombre}"]`) || document.getElementById(id);
 
@@ -14,6 +19,7 @@ async function pedirJson(url) {
   return res.json();
 }
 
+// ===== TUS FUNCIONES ACTUALES =====
 async function cargarHabitosHoy() {
   try {
     const resH = await fetch('/api/habitos');
@@ -56,9 +62,7 @@ async function cargarHabitosHoy() {
     });
 
     actualizarProgreso(completados, habitosDeHoy.length);
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  } catch (error) { console.error("Error:", error); }
 }
 
 async function toggleHabitoHoy(habitoId, checkbox) {
@@ -83,11 +87,16 @@ function actualizarProgreso(completados, total) {
   const conteo = document.querySelector('[data-ui="daily-count"]');
   const texto = document.querySelector('[data-ui="daily-ring-text"]');
   const arco = document.querySelector('[data-ui="daily-ring-arc"]');
+  
   if (conteo) conteo.textContent = `${completados} de ${total}`;
   if (texto) texto.textContent = `${porcentaje}%`;
   if (arco) arco.setAttribute('stroke-dasharray', `${porcentaje} 100`);
+  
+  // ¡NUEVO! Reaccionar del avatar
+  avatarReaccionar(porcentaje);
 }
 
+// ===== FUNCIONES DE CARGA =====
 async function cargarRacha() {
   try {
     const data = await pedirJson('/api/registros/racha');
@@ -96,7 +105,7 @@ async function cargarRacha() {
     if (valor) valor.textContent = `${data.racha} ${data.racha === 1 ? 'día' : 'días'}`;
     if (mensaje) mensaje.textContent = data.mensaje;
   } catch (error) {
-    console.error('Error cargando la racha:', error);
+    console.error('Error cargando racha:', error);
   }
 }
 
@@ -109,6 +118,7 @@ async function cargarNivel() {
     const siguiente = Number(data.xpSiguienteNivel ?? 500) || 500;
     const pct = Math.min(100, Math.max(0, (actual / siguiente) * 100));
 
+    // Tarjeta "Mi Nivel"
     const xp = $ui('xp-total', 'main-xp-total');
     const barra = $ui('level-bar', 'main-level-bar');
     const resto = $ui('level-remaining', 'main-level-remaining');
@@ -120,6 +130,7 @@ async function cargarNivel() {
         : `Faltan ${siguiente - actual} XP para el nivel ${nivel + 1}`;
     }
 
+    // Barra lateral
     const sNivel = document.getElementById('sidebar-nivel');
     const sXp = document.getElementById('sidebar-xp');
     const sBar = document.getElementById('sidebar-xpbar');
@@ -138,7 +149,7 @@ async function cargarSemanaIndex() {
 
     const contenedor = $ui('week-bars', 'main-week-bars');
     const resumen = $ui('week-summary', 'main-week-summary');
-    if (!contenedor) return;
+    if (!contenedor) { console.warn('No se encontró week-bars'); return; }
 
     const ordenada = [...data].sort((a, b) => a.fecha.localeCompare(b.fecha));
     const max = Math.max(...ordenada.map((d) => d.completados || 0), 1);
@@ -154,12 +165,15 @@ async function cargarSemanaIndex() {
       i.title = `${dia.dia}: ${n} hábito${n === 1 ? '' : 's'}`;
       contenedor.appendChild(i);
     }
-    if (resumen) resumen.textContent = `${total} hábito${total === 1 ? '' : 's'} esta semana`;
+    if (resumen) {
+      resumen.textContent = `${total} hábito${total === 1 ? '' : 's'} esta semana`;
+    }
   } catch (error) {
     console.error('Error cargando semana:', error);
   }
 }
 
+// Iniciar todas las cargas
 cargarHabitosHoy();
 cargarRacha();
 cargarNivel();

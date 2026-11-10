@@ -21,16 +21,19 @@
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/></svg>Seguimiento</a>
 <a class="n" href="perfil.html" data-nav="profile">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</a>
+
 <div class="lv" data-ui="sidebar-level">
   <b data-ui="sb-level" id="sidebar-nivel">Cargando...</b>
   <span data-ui="sb-xp" id="sidebar-xp">Cargando XP...</span>
   <div class="bar"><u data-ui="sb-xpbar" id="sidebar-xpbar" style="width:0%"></u></div>
 </div>
+
 <button id="btn-cerrar-sesion" class="n" style="margin-top: auto; background: transparent; border: none; color: #ff6b6b; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; font-size: 14px; width: 100%; text-align: left; border-radius: 8px;">
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
   Cerrar Sesión
 </button>
 </aside>
+
 <main class="mn wide">
 <header class="hd">
 <div>
@@ -55,6 +58,7 @@
 </div>
 </div>
 </section>
+
 <section class="c">
 <h2>Racha actual</h2>
 <div class="r" style="gap:14px">
@@ -65,6 +69,7 @@
 </div>
 </div>
 </section>
+
 <section class="c">
 <h2>Hábitos de hoy</h2>
 <div class="col" style="gap:12px" id="lista-habitos-hoy">
@@ -72,10 +77,62 @@
 </div>
 </section>
 </div>
+
+<!-- NUEVO AVATAR ANIMADO EN SVG -->
 <div style="text-align:center">
-<img src="avatar.png" alt="Avatar" style="width:100%;max-width:300px;height:auto;display:block;margin:0 auto">
-<div style="font:600 18px 'Space Grotesk';margin-top:4px">Pequeños hábitos, grandes cambios</div>
+  <div class="avatar-wrap" id="avatar" role="img" aria-label="Tu avatar de HabitUp">
+    <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="av-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#3C6CFF" stop-opacity=".75"/>
+          <stop offset="100%" stop-color="#3C6CFF" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <circle class="av-glow" cx="100" cy="140" r="100" fill="url(#av-glow)"/>
+      <ellipse cx="100" cy="263" rx="62" ry="10" fill="#1B2A6B"/>
+
+      <g class="av-body">
+        <rect x="70" y="200" width="22" height="50" rx="6" fill="#1C2340"/>
+        <rect x="108" y="200" width="22" height="50" rx="6" fill="#1C2340"/>
+        <ellipse cx="80" cy="252" rx="19" ry="9" fill="#fff" stroke="#2F5BFF" stroke-width="3"/>
+        <ellipse cx="120" cy="252" rx="19" ry="9" fill="#fff" stroke="#2F5BFF" stroke-width="3"/>
+
+        <rect x="42" y="118" width="18" height="62" rx="9" fill="#2F5BFF"/>
+        <circle cx="51" cy="184" r="9" fill="#F2B98C"/>
+
+        <path d="M58 132 Q58 112 78 108 L122 108 Q142 112 142 132 L146 208 L54 208 Z" fill="#2F5BFF"/>
+        <path d="M92 150 L100 136 L108 150 Z" fill="#fff"/>
+
+        <g class="av-arm">
+          <rect x="138" y="80" width="18" height="52" rx="9" fill="#2F5BFF"/>
+          <circle cx="147" cy="76" r="10" fill="#F2B98C"/>
+          <rect x="143" y="58" width="8" height="20" rx="4" fill="#F2B98C"/>
+        </g>
+
+        <g class="av-head">
+          <rect x="90" y="96" width="20" height="16" fill="#E7A97B"/>
+          <circle cx="66" cy="72" r="6" fill="#F2B98C"/>
+          <circle cx="134" cy="72" r="6" fill="#F2B98C"/>
+          <circle cx="100" cy="68" r="34" fill="#F2B98C"/>
+          <g fill="#1A1410">
+            <circle cx="70" cy="48" r="14"/><circle cx="85" cy="38" r="15"/>
+            <circle cx="102" cy="34" r="16"/><circle cx="118" cy="38" r="15"/>
+            <circle cx="132" cy="48" r="14"/><circle cx="66" cy="64" r="9"/>
+            <circle cx="134" cy="64" r="9"/>
+          </g>
+          <ellipse class="av-eye" cx="88" cy="70" rx="4" ry="5.5" fill="#2A1A10"/>
+          <ellipse class="av-eye" cx="112" cy="70" rx="4" ry="5.5" fill="#2A1A10"/>
+          <circle cx="78" cy="80" r="6" fill="#FF8A8A" opacity=".35"/>
+          <circle cx="122" cy="80" r="6" fill="#FF8A8A" opacity=".35"/>
+          <path d="M86 82 Q100 98 114 82 Z" fill="#fff" stroke="#8A3B2A" stroke-width="2" stroke-linejoin="round"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div style="font:600 18px 'Space Grotesk';margin-top:4px">Pequeños hábitos, grandes cambios</div>
 </div>
+
 <div class="col">
 <section class="c">
 <h2 data-ui="level-title">Mi Nivel</h2>
@@ -94,7 +151,7 @@
 </div>
 </main>
 </div>
-<script type="module" src="js/index.js"></script>
+<script type="module" src="js/index.js?v=3"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
