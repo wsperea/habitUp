@@ -5,7 +5,7 @@ document.getElementById('btn-cerrar-sesion').addEventListener('click', () => win
 
 async function cargarEstadisticas() {
   try {
-    // 1. Cargar gráfico de barras semanales
+    // 1. Cargar datos semanales
     const resSemana = await fetch('/api/registros/semana');
     if (!resSemana.ok) throw new Error('Error al cargar semana');
     const dataSemana = await resSemana.json();
@@ -40,20 +40,24 @@ async function cargarEstadisticas() {
     });
 
     document.getElementById('resumen-semana').textContent = `Total de la semana: ${totalCompletados} hábitos completados`;
-    document.querySelector('[data-ui="stat-completed"]').textContent = `${totalCompletados}`;
+    
+    // Actualizar la tarjeta de "Hábitos completados" (la de las 3 tarjetas de abajo)
+    const statCompleted = document.querySelector('[data-ui="stat-completed"]');
+    if (statCompleted) statCompleted.textContent = `${totalCompletados}`;
 
     // 2. Cargar Racha
     const resRacha = await fetch('/api/registros/racha');
     const dataRacha = await resRacha.json();
-    document.querySelector('[data-ui="stat-streak"]').textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
+    const statStreak = document.querySelector('[data-ui="stat-streak"]');
+    if (statStreak) statStreak.textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
 
     // 3. Cargar XP
     const resNivel = await fetch('/api/registros/nivel');
     const dataNivel = await resNivel.json();
-    document.querySelector('[data-ui="stat-xp"]').textContent = dataNivel.xpTotal;
+    const statXp = document.querySelector('[data-ui="stat-xp"]');
+    if (statXp) statXp.textContent = dataNivel.xpTotal;
 
-    // 4. Cargar Progreso Semanal (Anillo) - CORREGIDO
-    // Necesitamos los hábitos activos para calcular el "esperado"
+    // 4. Calcular el progreso semanal (Anillo)
     const resHabitos = await fetch('/api/habitos');
     const habitos = await resHabitos.json();
     const habitosActivos = habitos.filter(h => h.activo !== false);
@@ -63,7 +67,6 @@ async function cargarEstadisticas() {
     
     dataSemana.forEach(dia => {
       const nombreDia = nombresDiasCompletos[new Date(dia.fecha + 'T12:00:00Z').getDay()];
-      // Contamos cuántos hábitos debían hacerse ese día
       esperados += habitosActivos.filter(h => {
         if (!h.frecuencia || !h.frecuencia.dias || h.frecuencia.dias.length === 0) return true;
         return h.frecuencia.dias.includes(nombreDia);
@@ -72,24 +75,25 @@ async function cargarEstadisticas() {
 
     const porcentaje = esperados === 0 ? 0 : Math.min(100, Math.round((totalCompletados / esperados) * 100));
 
-    // Actualizamos el HTML del anillo (asegúrate de que estos data-ui coincidan con tu HTML)
+    // Buscamos por data-ui, que es como están en tu HTML
     const summaryEl = document.querySelector('[data-ui="progress-summary"]');
-    const pctEl = document.querySelector('[data-ui="progress-ring-text"]');
+    const textEl = document.querySelector('[data-ui="progress-ring-text"]');
     const arcEl = document.querySelector('[data-ui="progress-ring-arc"]');
 
     if (summaryEl) summaryEl.textContent = `${totalCompletados} de ${esperados} hábitos esta semana`;
-    if (pctEl) pctEl.textContent = `${porcentaje}%`;
+    if (textEl) textEl.textContent = `${porcentaje}%`;
+    
     if (arcEl) {
       arcEl.setAttribute('stroke-dasharray', `${porcentaje} 100`);
-      // Cambiar color del anillo según el progreso
-      if (porcentaje < 30) arcEl.setAttribute('stroke', '#FF6B6B');
-      else if (porcentaje < 70) arcEl.setAttribute('stroke', '#FFB547');
-      else arcEl.setAttribute('stroke', '#3DDC97');
+      if (porcentaje < 30) arcEl.setAttribute('stroke', '#FF6B6B'); // Rojo
+      else if (porcentaje < 70) arcEl.setAttribute('stroke', '#FFB547'); // Naranja
+      else arcEl.setAttribute('stroke', '#3DDC97'); // Verde
     }
 
   } catch (error) {
     console.error("Error cargando estadísticas:", error);
-    document.getElementById('grafico-semana').innerHTML = '<p class="mu">Error al cargar la gráfica</p>';
+    const cont = document.getElementById('grafico-semana');
+    if (cont) cont.innerHTML = '<p class="mu">Error al cargar la gráfica</p>';
   }
 }
 
