@@ -1,33 +1,33 @@
-// Conexión a MongoDB. Para pasar a Atlas solo cambia MONGODB_URI en server/.env.
 import mongoose from 'mongoose';
-import { config } from './config.js';
+import dns from 'node:dns/promises'; // Importar DNS
 
-mongoose.set('strictQuery', true);
+// Forzar el uso de los DNS de Google para que Render encuentre el clúster
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-export async function connectDb(uri = config.mongoUri) {
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-  return mongoose.connection;
+export async function connectDb() {
+  try {
+    // Conectamos usando la variable de entorno y forzando IPv4
+    await mongoose.connect(process.env.MONGODB_URI, {
+      family: 4, 
+      serverSelectionTimeoutMS: 5000
+    });
+    console.log('[habitup] MongoDB conectado exitosamente.');
+  } catch (error) {
+    console.error('[habitup] Error de conexión a MongoDB:', error.message);
+    throw error;
+  }
 }
 
-export const disconnectDb = () => mongoose.disconnect();
-export const isDbReady = () => mongoose.connection.readyState === 1;
-export const dbState = () =>
-  ['desconectado', 'conectado', 'conectando', 'desconectando'][mongoose.connection.readyState] ?? 'desconocido';
+export async function disconnectDb() {
+  await mongoose.disconnect();
+}
 
-// Oculta usuario y clave al mostrar la URI en consola.
-export const redactUri = (uri) => uri.replace(/\/\/[^@/]+@/, '//***@');
-
+// Funciones auxiliares que tenías (describeDbError, redactUri, etc.)
 export function describeDbError(err) {
-  if (err?.name === 'MongooseServerSelectionError' || err?.name === 'MongoServerSelectionError') {
-    return [
-      `No se pudo conectar a MongoDB (${redactUri(config.mongoUri)}).`,
-      '  • Local: verifica que el servicio "MongoDB Server" esté iniciado (Windows: services.msc).',
-      '  • Atlas: revisa usuario, clave y que tu IP esté en Network Access.',
-      '  • Revisa MONGODB_URI en server/.env.',
-    ].join('\n');
-  }
-  if (err?.code === 18 || /auth/i.test(err?.message ?? '')) {
-    return 'MongoDB rechazó las credenciales. Revisa usuario y clave en MONGODB_URI.';
-  }
-  return `Error de base de datos: ${err?.message ?? err}`;
+  return err.message || 'Error desconocido en la base de datos';
+}
+
+export function redactUri(uri) {
+  if (!uri) return 'URI no definida';
+  return uri.replace(/:([^:@]+)@/, ':****@');
 }
