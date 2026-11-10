@@ -17,9 +17,7 @@ const diaDeFecha = (fecha) => new Date(`${fecha}T12:00:00Z`).getUTCDay();
 
 async function cargarEstadisticas() {
   try {
-    // 1. Semana (gráfica)
     const dataSemana = await pedirJson('/api/registros/semana');
-    console.log('[semana] respuesta:', dataSemana);
     if (!Array.isArray(dataSemana)) throw new Error('/semana no devolvió un array');
 
     const ordenada = [...dataSemana].sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -33,13 +31,11 @@ async function cargarEstadisticas() {
         const n = dia.completados || 0;
         totalCompletados += n;
         const altura = Math.max((n / max) * 100, 5);
-        const activo = n > 0;
-
         const col = document.createElement('div');
         col.style.cssText = 'flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;';
         col.innerHTML = `
           <span style="font-size:12px; color:#fff; margin-bottom:5px;">${n}</span>
-          <div style="height:${altura}%; width:100%; max-width:40px; background:${activo ? '#7FA2FF' : '#22305E'}; border-radius:6px 6px 0 0; transition:height 0.3s;"></div>
+          <div style="height:${altura}%; width:100%; max-width:40px; background:${n > 0 ? '#7FA2FF' : '#22305E'}; border-radius:6px 6px 0 0; transition:height 0.3s;"></div>
           <div style="font-size:13px; font-weight:600; color:#8892B0; margin-top:8px;">${NOMBRES_CORTOS[diaDeFecha(dia.fecha)]}</div>
         `;
         contenedor.appendChild(col);
@@ -50,28 +46,23 @@ async function cargarEstadisticas() {
 
     const resumen = document.getElementById('resumen-semana');
     if (resumen) resumen.textContent = `Total de la semana: ${totalCompletados} hábitos completados`;
-
     const statCompleted = document.querySelector('[data-ui="stat-completed"]');
     if (statCompleted) statCompleted.textContent = `${totalCompletados}`;
 
-    // 2. Racha
     try {
-      const dataRacha = await pedirJson('/api/registros/racha');
-      const statStreak = document.querySelector('[data-ui="stat-streak"]');
-      if (statStreak) statStreak.textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
+      const r = await pedirJson('/api/registros/racha');
+      const el = document.querySelector('[data-ui="stat-streak"]');
+      if (el) el.textContent = `${r.racha} ${r.racha === 1 ? 'día' : 'días'}`;
     } catch (e) { console.error('Error cargando racha:', e); }
 
-    // 3. XP
     try {
-      const dataNivel = await pedirJson('/api/registros/nivel');
-      const statXp = document.querySelector('[data-ui="stat-xp"]');
-      if (statXp) statXp.textContent = dataNivel.xpTotal;
+      const n = await pedirJson('/api/registros/nivel');
+      const el = document.querySelector('[data-ui="stat-xp"]');
+      if (el) el.textContent = n.xpTotal;
     } catch (e) { console.error('Error cargando XP:', e); }
 
-    // 4. Anillo de progreso semanal
     const habitos = await pedirJson('/api/habitos');
     const activos = habitos.filter((h) => h.activo !== false);
-
     let esperados = 0;
     for (const dia of ordenada) {
       const nombreDia = NOMBRES_LARGOS[diaDeFecha(dia.fecha)];
@@ -82,11 +73,9 @@ async function cargarEstadisticas() {
     }
 
     const porcentaje = esperados === 0 ? 0 : Math.min(100, Math.round((totalCompletados / esperados) * 100));
-
     const summaryEl = document.querySelector('[data-ui="progress-summary"]');
     const textEl = document.querySelector('[data-ui="progress-ring-text"]');
     const arcEl = document.querySelector('[data-ui="progress-ring-arc"]');
-
     if (summaryEl) summaryEl.textContent = `${totalCompletados} de ${esperados} hábitos esta semana`;
     if (textEl) textEl.textContent = `${porcentaje}%`;
     if (arcEl) {
