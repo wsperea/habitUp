@@ -1,26 +1,32 @@
 import mongoose from 'mongoose';
-import dns from 'node:dns/promises';
 
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+mongoose.set('strictQuery', true);
 
-export async function connectDb() {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      family: 4,
-      serverSelectionTimeoutMS: 15000,
-      maxPoolSize: 1, // <-- IMPORTANTE: Evita que Render se quede sin memoria
-      minPoolSize: 0,
-      socketTimeoutMS: 45000
-    });
-    console.log('[habitup] MongoDB conectado exitosamente.');
-  } catch (error) {
-    console.error('[habitup] ERROR DETALLADO DE MONGODB:', error);
-    throw error;
-  }
+export function redactUri(uri) {
+  if (!uri) return 'URI no definida';
+  return uri.replace(/\/\/([^:@/]+):([^@]+)@/, '//$1:****@');
+}
+
+export function describeDbError(err) {
+  if (!err) return 'Error desconocido';
+  const parts = [err.name, err.code, err.message].filter(Boolean);
+  return parts.join(' | ') || 'Error desconocido';
+}
+
+export async function connectDb(uri = process.env.MONGODB_URI) {
+  if (!uri) throw new Error('MONGODB_URI no está definida en las variables de entorno');
+  await mongoose.connect(uri, {
+    family: 4,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
+    maxPoolSize: 5
+  });
 }
 
 export async function disconnectDb() {
-  await mongoose.disconnect();
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
 }
 
 export function dbState() {
@@ -30,13 +36,4 @@ export function dbState() {
 
 export function isDbReady() {
   return mongoose.connection.readyState === 1;
-}
-
-export function describeDbError(err) {
-  return err.message || 'Error desconocido en la base de datos';
-}
-
-export function redactUri(uri) {
-  if (!uri) return 'URI no definida';
-  return uri.replace(/:([^:@]+)@/, ':****@');
 }
