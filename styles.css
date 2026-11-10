@@ -214,3 +214,11 @@ body.light-mode .av { color: #FFFFFF !important; }
 @media (prefers-reduced-motion: reduce) {
   .av-body, .av-head, .av-eye, .av-arm, .av-glow, .av-ring { animation: none !important; }
 }
+
+.form-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #FF6B6B;
+}
+.form-error[hidden] { display: none; }
+input.invalido { border-color: #FF6B6B !important; }
