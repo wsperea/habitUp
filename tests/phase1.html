@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HabitUp · Pruebas Fase 1</title>
+<style>
+  body{font:15px system-ui,sans-serif;margin:24px;background:#0A1128;color:#F2F5FF}
+  h1{font-size:20px} .sum{font-weight:700;margin:12px 0}
+  li{margin:6px 0;list-style:none} .ok{color:#3DDC97} .fail{color:#FF8A8A} small{display:block;color:#A9B4D0}
+</style>
+</head>
+<body>
+<h1>Pruebas automáticas · Fase 1</h1>
+<p class="sum" id="sum">Ejecutando…</p>
+<ul id="out"></ul>
+<script type="module">
+  import { runTests } from './phase1.test.js';
+  const results = await runTests();
+  const passed = results.filter((r) => r.ok).length;
+  document.getElementById('sum').textContent = `${passed} de ${results.length} pruebas pasaron`;
+  document.getElementById('sum').className = 'sum ' + (passed === results.length ? 'ok' : 'fail');
+  document.getElementById('out').innerHTML = results.map((r) =>
+    `<li class="${r.ok ? 'ok' : 'fail'}">${r.ok ? '✔' : '✘'} ${r.name}${r.ok ? '' : `<small>${r.error}</small>`}</li>`).join('');
+</script>
+</body>
+</html>

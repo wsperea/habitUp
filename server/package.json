@@ -1,0 +1,27 @@
+{
+  "name": "habitup-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API de HabitUp (Express + MongoDB)",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "import": "node scripts/import-data.js",
+    "import:dry": "node scripts/import-data.js --dry-run",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.24.8"
+  }
+}

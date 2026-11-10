@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HabitUp · Mis hábitos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+  .modal-overlay.active { display: flex; }
+  .modal-content { background: #1A2238; padding: 30px; border-radius: 16px; width: 100%; max-width: 450px; border: 1px solid #2A3B5C; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .modal-content input[type="text"] { width: 100%; padding: 12px; background: #0F1523; border: 1px solid #2A3B5C; border-radius: 8px; color: #fff; margin-bottom: 15px; font-family: 'Inter', sans-serif; }
+  .dias-checkbox { display: flex; gap: 8px; margin-bottom: 20px; }
+  .dias-checkbox label { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #0F1523; border: 1px solid #2A3B5C; cursor: pointer; font-size: 12px; user-select: none; }
+  .dias-checkbox input[type="checkbox"] { display: none; }
+  .dias-checkbox input:checked + label { background: #7FA2FF; color: #000; border-color: #7FA2FF; font-weight: bold; }
+</style>
+</head>
+<body data-page="habits">
+<div class="app">
+<aside class="sb" data-ui="sidebar" style="display: flex; flex-direction: column;">
+<div class="lg">Habit<b>Up</b></div>
+<a class="n" href="index.html" data-nav="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+<a class="n on" aria-current="page" href="habitos.html" data-nav="habits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M4 12h9M4 18h5M15 17l2 2 4-5"/></svg>Mis hábitos</a>
+<a class="n" href="seguimiento.html" data-nav="tracking"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/></svg>Seguimiento</a>
+<a class="n" href="perfil.html" data-nav="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</a>
+<div class="lv" data-ui="sidebar-level"><b data-ui="sb-level" id="sidebar-nivel">Cargando...</b><span data-ui="sb-xp" id="sidebar-xp">Cargando XP...</span><div class="bar"><u data-ui="sb-xpbar" id="sidebar-xpbar" style="width:0%"></u></div></div>
+<button id="btn-cerrar-sesion" class="n" style="margin-top: auto; background: transparent; border: none; color: #ff6b6b; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; font-size: 14px; width: 100%; text-align: left; border-radius: 8px;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Cerrar Sesión</button>
+</aside>
+
+<main class="mn">
+<header class="hd">
+<div><h1>Mis hábitos</h1><p class="sub">Gestiona tus hábitos y construye tu rutina</p></div>
+<span class="av" data-ui="user-avatar" aria-label="Usuario">...</span>
+</header>
+
+<button id="btn-abrir-modal" class="btn" type="button" style="align-self:flex-start;padding:16px 28px; margin-bottom: 20px;">+ Crear nuevo hábito</button>
+
+<div data-list="habits" id="lista-habitos" style="display:flex; flex-direction:column; gap:12px;">
+  <p class="mu">Cargando hábitos...</p>
+</div>
+</main>
+</div>
+
+<div class="modal-overlay" id="modalHabito">
+  <div class="modal-content">
+    <h2 style="margin-top:0; font-family:'Space Grotesk';">Nuevo Hábito</h2>
+    <form id="formHabito">
+      <label class="mu">Nombre</label>
+      <input type="text" id="habitoNombre" required placeholder="Ej. Meditar 10 min">
+      <label class="mu">Categoría</label>
+      <input type="text" id="habitoCategoria" required placeholder="Ej. Salud y bienestar">
+      <label class="mu">Descripción (Opcional)</label>
+      <input type="text" id="habitoDescripcion" placeholder="Ej. Para empezar el día con calma">
+      <label class="mu">Días de la semana</label>
+      <div class="dias-checkbox">
+        <input type="checkbox" id="d-lunes" value="lunes"><label for="d-lunes">L</label>
+        <input type="checkbox" id="d-martes" value="martes"><label for="d-martes">M</label>
+        <input type="checkbox" id="d-miercoles" value="miercoles"><label for="d-miercoles">X</label>
+        <input type="checkbox" id="d-jueves" value="jueves"><label for="d-jueves">J</label>
+        <input type="checkbox" id="d-viernes" value="viernes"><label for="d-viernes">V</label>
+        <input type="checkbox" id="d-sabado" value="sabado"><label for="d-sabado">S</label>
+        <input type="checkbox" id="d-domingo" value="domingo"><label for="d-domingo">D</label>
+      </div>
+      <div class="r" style="gap:10px; justify-content:flex-end;">
+        <button type="button" id="btn-cerrar-modal" class="ghost">Cancelar</button>
+        <button type="submit" class="btn">Guardar Hábito</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script type="module" src="js/habitos.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HabitUp · Inicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+<div class="app">
+<aside class="sb" data-ui="sidebar" style="display: flex; flex-direction: column;">
+<div class="lg">Habit<b>Up</b></div>
+<a class="n on" aria-current="page" href="index.html" data-nav="home">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+<a class="n" href="habitos.html" data-nav="habits">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M4 12h9M4 18h5M15 17l2 2 4-5"/></svg>Mis hábitos</a>
+<a class="n" href="seguimiento.html" data-nav="tracking">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/></svg>Seguimiento</a>
+<a class="n" href="perfil.html" data-nav="profile">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</a>
+<div class="lv" data-ui="sidebar-level">
+  <b data-ui="sb-level" id="sidebar-nivel">Cargando...</b>
+  <span data-ui="sb-xp" id="sidebar-xp">Cargando XP...</span>
+  <div class="bar"><u data-ui="sb-xpbar" id="sidebar-xpbar" style="width:0%"></u></div>
+</div>
+<button id="btn-cerrar-sesion" class="n" style="margin-top: auto; background: transparent; border: none; color: #ff6b6b; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; font-size: 14px; width: 100%; text-align: left; border-radius: 8px;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+  Cerrar Sesión
+</button>
+</aside>
+<main class="mn wide">
+<header class="hd">
+<div>
+<h1 data-ui="greeting">Buenos días...</h1>
+<p class="sub">Sigue construyendo una mejor versión de ti</p>
+</div>
+<span class="av" data-ui="user-avatar" aria-label="Usuario">...</span>
+</header>
+<div class="hub">
+<div class="col">
+<section class="c">
+<h2>Progreso diario</h2>
+<div class="r" style="gap:14px">
+<svg viewBox="0 0 36 36" width="88" height="88" role="img" data-ui="daily-ring">
+<circle cx="18" cy="18" r="15.9155" fill="none" stroke="#22305E" stroke-width="3.5"/>
+<circle cx="18" cy="18" r="15.9155" fill="none" stroke="#7FA2FF" data-ui="daily-ring-arc" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 100" transform="rotate(-90 18 18)"/>
+<text x="18" y="20.4" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Space Grotesk" data-ui="daily-ring-text">0%</text>
+</svg>
+<div>
+<div class="sm" data-ui="daily-count">0 de 0</div>
+<div class="mu cp">hábitos hoy</div>
+</div>
+</div>
+</section>
+<section class="c">
+<h2>Racha actual</h2>
+<div class="r" style="gap:14px">
+<svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="#E9A94F"/></svg>
+<div>
+<div class="sm" id="racha-valor">0 días</div>
+<div class="mu cp" id="racha-mensaje">¡Empieza hoy!</div>
+</div>
+</div>
+</section>
+<section class="c">
+<h2>Hábitos de hoy</h2>
+<div class="col" style="gap:12px" id="lista-habitos-hoy">
+<p class="mu">Cargando...</p>
+</div>
+</section>
+</div>
+<div style="text-align:center">
+<img src="avatar.png" alt="Avatar" style="width:100%;max-width:300px;height:auto;display:block;margin:0 auto">
+<div style="font:600 18px 'Space Grotesk';margin-top:4px">Pequeños hábitos, grandes cambios</div>
+</div>
+<div class="col">
+<section class="c">
+<h2 data-ui="level-title">Mi Nivel</h2>
+<div class="sm" data-ui="xp-total" id="main-xp-total">0 XP</div>
+<div class="bar" style="margin:12px 0 8px"><u data-ui="level-bar" id="main-level-bar" style="width:0%"></u></div>
+<div class="mu cp" data-ui="level-remaining" id="main-level-remaining">Calculando...</div>
+</section>
+<section class="c">
+<h2>Esta semana</h2>
+<div class="wk" aria-hidden="true" data-ui="week-bars">
+<i style="height:50%"></i><i style="height:70%"></i><i style="height:60%"></i><i style="height:85%"></i><i style="height:75%"></i><i style="height:95%"></i><i style="height:40%"></i>
+</div>
+<div class="mu cp" style="margin-top:10px" data-ui="week-summary">Calculando...</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<script type="module" src="js/index.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

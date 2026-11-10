@@ -1,0 +1,13 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad76cfeaf6492ec2d54fe13"
+    },
+    "nombre": "Steven",
+    "correo": "steven@example.com",
+    "password": "$2b$10$abcdefghijklmnopqrstuv", 
+    "fecha_registro": {
+      "$date": "2026-10-20T12:00:00Z"
+    }
+  }
+]

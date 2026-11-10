@@ -1,0 +1,18 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad76d76af6492ec2d54fe1d"
+    },
+    "usuario_id": {
+      "$oid": "6ad76cfeaf6492ec2d54fe13"
+    },
+    "habito_id": {
+      "$oid": "6ad76d76af6492ec2d54fe1c"
+    },
+    "fecha": {
+      "$date": "2026-10-20T12:00:00Z"
+    },
+    "completado": true,
+    "nota": "Primer día de prueba"
+  }
+]

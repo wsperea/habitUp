@@ -1,0 +1,26 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad76d76af6492ec2d54fe1c"
+    },
+    "usuario_id": {
+      "$oid": "6ad76cfeaf6492ec2d54fe13"
+    },
+    "nombre": "Leer 10 páginas",
+    "categoria": "Aprendizaje y conocimiento",
+    "descripcion": "Leer un libro de superación personal",
+    "frecuencia": {
+      "dias": [
+        "lunes",
+        "martes",
+        "miercoles",
+        "jueves",
+        "viernes"
+      ]
+    },
+    "activo": true,
+    "fecha_creacion": {
+      "$date": "2026-10-20T12:00:00Z"
+    }
+  }
+]
