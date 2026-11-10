@@ -7,11 +7,12 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 export async function connectDb() {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      family: 4
+      family: 4,
+      serverSelectionTimeoutMS: 10000 // Esperar hasta 10 segundos
     });
     console.log('[habitup] MongoDB conectado exitosamente.');
   } catch (error) {
-    console.error('[habitup] Error de conexión a MongoDB:', error.message);
+    console.error('[habitup] ERROR DETALLADO DE MONGODB:', error);
     throw error;
   }
 }
