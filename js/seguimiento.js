@@ -1,97 +1,100 @@
 import { inicializarApp } from './comun.js';
 inicializarApp();
 
-document.getElementById('btn-cerrar-sesion').addEventListener('click', () => window.cerrarSesion());
+console.log('[seguimiento.js] v2 cargado');
+
+document.getElementById('btn-cerrar-sesion')?.addEventListener('click', () => window.cerrarSesion());
+
+async function pedirJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url} respondió ${res.status}`);
+  return res.json();
+}
+
+const NOMBRES_CORTOS = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
+const NOMBRES_LARGOS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+const diaDeFecha = (fecha) => new Date(`${fecha}T12:00:00Z`).getUTCDay();
 
 async function cargarEstadisticas() {
   try {
-    // 1. Cargar datos semanales
-    const resSemana = await fetch('/api/registros/semana');
-    if (!resSemana.ok) throw new Error('Error al cargar semana');
-    const dataSemana = await resSemana.json();
-    
-    const contenedor = document.getElementById('grafico-semana');
-    contenedor.innerHTML = ''; 
+    // 1. Semana (gráfica)
+    const dataSemana = await pedirJson('/api/registros/semana');
+    console.log('[semana] respuesta:', dataSemana);
+    if (!Array.isArray(dataSemana)) throw new Error('/semana no devolvió un array');
 
-    const nombresDias = { 1: 'Lu', 2: 'Ma', 3: 'Mi', 4: 'Ju', 5: 'Vi', 6: 'Sá', 0: 'Do' };
-    const dataOrdenada = [...dataSemana].sort((a, b) => {
-      const diaA = new Date(a.fecha + 'T12:00:00Z').getDay();
-      const diaB = new Date(b.fecha + 'T12:00:00Z').getDay();
-      return (diaA === 0 ? 7 : diaA) - (diaB === 0 ? 7 : diaB);
-    });
-
+    const ordenada = [...dataSemana].sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const max = Math.max(...ordenada.map((d) => d.completados || 0), 1);
     let totalCompletados = 0;
-    const maxCompletados = Math.max(...dataOrdenada.map(d => d.completados), 1);
 
-    dataOrdenada.forEach(dia => {
-      totalCompletados += dia.completados;
-      const altura = (dia.completados / maxCompletados) * 100;
-      const esActivo = dia.completados > 0;
-      const diaNum = new Date(dia.fecha + 'T12:00:00Z').getDay();
-      const nombreDia = nombresDias[diaNum];
+    const contenedor = document.getElementById('grafico-semana');
+    if (contenedor) {
+      contenedor.innerHTML = '';
+      for (const dia of ordenada) {
+        const n = dia.completados || 0;
+        totalCompletados += n;
+        const altura = Math.max((n / max) * 100, 5);
+        const activo = n > 0;
 
-      contenedor.innerHTML += `
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;">
-          <span style="font-size:12px; color:#fff; margin-bottom:5px;">${dia.completados}</span>
-          <div style="height: ${Math.max(altura, 5)}%; width: 100%; max-width: 40px; background: ${esActivo ? '#7FA2FF' : '#22305E'}; border-radius: 6px 6px 0 0; transition: height 0.3s;"></div>
-          <div style="font-size:13px; font-weight: 600; color:#8892B0; margin-top:8px;">${nombreDia}</div>
-        </div>
-      `;
-    });
+        const col = document.createElement('div');
+        col.style.cssText = 'flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;';
+        col.innerHTML = `
+          <span style="font-size:12px; color:#fff; margin-bottom:5px;">${n}</span>
+          <div style="height:${altura}%; width:100%; max-width:40px; background:${activo ? '#7FA2FF' : '#22305E'}; border-radius:6px 6px 0 0; transition:height 0.3s;"></div>
+          <div style="font-size:13px; font-weight:600; color:#8892B0; margin-top:8px;">${NOMBRES_CORTOS[diaDeFecha(dia.fecha)]}</div>
+        `;
+        contenedor.appendChild(col);
+      }
+    } else {
+      totalCompletados = ordenada.reduce((s, d) => s + (d.completados || 0), 0);
+    }
 
-    document.getElementById('resumen-semana').textContent = `Total de la semana: ${totalCompletados} hábitos completados`;
-    
-    // Actualizar la tarjeta de "Hábitos completados" (la de las 3 tarjetas de abajo)
+    const resumen = document.getElementById('resumen-semana');
+    if (resumen) resumen.textContent = `Total de la semana: ${totalCompletados} hábitos completados`;
+
     const statCompleted = document.querySelector('[data-ui="stat-completed"]');
     if (statCompleted) statCompleted.textContent = `${totalCompletados}`;
 
-    // 2. Cargar Racha
-    const resRacha = await fetch('/api/registros/racha');
-    const dataRacha = await resRacha.json();
-    const statStreak = document.querySelector('[data-ui="stat-streak"]');
-    if (statStreak) statStreak.textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
+    // 2. Racha
+    try {
+      const dataRacha = await pedirJson('/api/registros/racha');
+      const statStreak = document.querySelector('[data-ui="stat-streak"]');
+      if (statStreak) statStreak.textContent = `${dataRacha.racha} ${dataRacha.racha === 1 ? 'día' : 'días'}`;
+    } catch (e) { console.error('Error cargando racha:', e); }
 
-    // 3. Cargar XP
-    const resNivel = await fetch('/api/registros/nivel');
-    const dataNivel = await resNivel.json();
-    const statXp = document.querySelector('[data-ui="stat-xp"]');
-    if (statXp) statXp.textContent = dataNivel.xpTotal;
+    // 3. XP
+    try {
+      const dataNivel = await pedirJson('/api/registros/nivel');
+      const statXp = document.querySelector('[data-ui="stat-xp"]');
+      if (statXp) statXp.textContent = dataNivel.xpTotal;
+    } catch (e) { console.error('Error cargando XP:', e); }
 
-    // 4. Calcular el progreso semanal (Anillo)
-    const resHabitos = await fetch('/api/habitos');
-    const habitos = await resHabitos.json();
-    const habitosActivos = habitos.filter(h => h.activo !== false);
+    // 4. Anillo de progreso semanal
+    const habitos = await pedirJson('/api/habitos');
+    const activos = habitos.filter((h) => h.activo !== false);
 
     let esperados = 0;
-    const nombresDiasCompletos = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-    
-    dataSemana.forEach(dia => {
-      const nombreDia = nombresDiasCompletos[new Date(dia.fecha + 'T12:00:00Z').getDay()];
-      esperados += habitosActivos.filter(h => {
-        if (!h.frecuencia || !h.frecuencia.dias || h.frecuencia.dias.length === 0) return true;
-        return h.frecuencia.dias.includes(nombreDia);
+    for (const dia of ordenada) {
+      const nombreDia = NOMBRES_LARGOS[diaDeFecha(dia.fecha)];
+      esperados += activos.filter((h) => {
+        const dias = h.frecuencia?.dias;
+        return !dias || dias.length === 0 || dias.includes(nombreDia);
       }).length;
-    });
+    }
 
     const porcentaje = esperados === 0 ? 0 : Math.min(100, Math.round((totalCompletados / esperados) * 100));
 
-    // Buscamos por data-ui, que es como están en tu HTML
     const summaryEl = document.querySelector('[data-ui="progress-summary"]');
     const textEl = document.querySelector('[data-ui="progress-ring-text"]');
     const arcEl = document.querySelector('[data-ui="progress-ring-arc"]');
 
     if (summaryEl) summaryEl.textContent = `${totalCompletados} de ${esperados} hábitos esta semana`;
     if (textEl) textEl.textContent = `${porcentaje}%`;
-    
     if (arcEl) {
       arcEl.setAttribute('stroke-dasharray', `${porcentaje} 100`);
-      if (porcentaje < 30) arcEl.setAttribute('stroke', '#FF6B6B'); // Rojo
-      else if (porcentaje < 70) arcEl.setAttribute('stroke', '#FFB547'); // Naranja
-      else arcEl.setAttribute('stroke', '#3DDC97'); // Verde
+      arcEl.setAttribute('stroke', porcentaje < 30 ? '#FF6B6B' : porcentaje < 70 ? '#FFB547' : '#3DDC97');
     }
-
   } catch (error) {
-    console.error("Error cargando estadísticas:", error);
+    console.error('Error cargando estadísticas:', error);
     const cont = document.getElementById('grafico-semana');
     if (cont) cont.innerHTML = '<p class="mu">Error al cargar la gráfica</p>';
   }
