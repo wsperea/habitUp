@@ -5,18 +5,21 @@ import { verificarToken } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
+const TZ = 'America/Bogota'; // UTC-5, sin horario de verano
+const fmtDia = (d) => d.toLocaleDateString('en-CA', { timeZone: TZ }); // YYYY-MM-DD
+const DIA_MS = 24 * 60 * 60 * 1000;
+
 // Obtener los registros de HOY
 router.get('/hoy', verificarToken, async (req, res) => {
   try {
-    const inicioDia = new Date();
-    inicioDia.setHours(0, 0, 0, 0);
-    const finDia = new Date();
-    finDia.setHours(23, 59, 59, 999);
-
+    const inicioDia = new Date(`${fmtDia(new Date())}T00:00:00-05:00`);
+    const finDia = new Date(inicioDia.getTime() + DIA_MS - 1);
+    
     const registros = await Registro.find({
       usuario_id: req.usuario.id,
       fecha: { $gte: inicioDia, $lte: finDia }
     });
+    
     res.json(registros);
   } catch (error) {
     console.error(error);
@@ -29,10 +32,8 @@ router.post('/toggle', verificarToken, async (req, res) => {
   try {
     const { habito_id } = req.body;
     
-    const inicioDia = new Date();
-    inicioDia.setHours(0, 0, 0, 0);
-    const finDia = new Date();
-    finDia.setHours(23, 59, 59, 999);
+    const inicioDia = new Date(`${fmtDia(new Date())}T00:00:00-05:00`);
+    const finDia = new Date(inicioDia.getTime() + DIA_MS - 1);
 
     const registroExistente = await Registro.findOne({
       usuario_id: req.usuario.id,
@@ -59,29 +60,29 @@ router.post('/toggle', verificarToken, async (req, res) => {
   }
 });
 
-// Calcular la racha de días consecutivos
+// Calcular la racha de días consecutivos (con zona horaria)
 router.get('/racha', verificarToken, async (req, res) => {
   try {
     const registros = await Registro.find({ usuario_id: req.usuario.id }).sort({ fecha: -1 });
     if (registros.length === 0) return res.json({ racha: 0, mensaje: '¡Empieza hoy!' });
 
-    const fechasUnicas = [...new Set(registros.map(r => {
-      const d = new Date(r.fecha);
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    }))];
+    // Extraer fechas únicas en la zona horaria de Bogotá
+    const fechasUnicas = [...new Set(registros.map(r => fmtDia(r.fecha)))];
 
     let racha = 0;
     let fechaActual = new Date();
-    fechaActual.setHours(0, 0, 0, 0);
-
-    const hoyStr = `${fechaActual.getFullYear()}-${fechaActual.getMonth()}-${fechaActual.getDate()}`;
-    if (!fechasUnicas.includes(hoyStr)) fechaActual.setDate(fechaActual.getDate() - 1);
+    
+    const hoyStr = fmtDia(fechaActual);
+    // Si no hay registro hoy, empezamos a contar desde ayer
+    if (!fechasUnicas.includes(hoyStr)) {
+      fechaActual = new Date(fechaActual.getTime() - DIA_MS);
+    }
 
     while (true) {
-      const diaStr = `${fechaActual.getFullYear()}-${fechaActual.getMonth()}-${fechaActual.getDate()}`;
+      const diaStr = fmtDia(fechaActual);
       if (fechasUnicas.includes(diaStr)) {
         racha++;
-        fechaActual.setDate(fechaActual.getDate() - 1);
+        fechaActual = new Date(fechaActual.getTime() - DIA_MS);
       } else {
         break;
       }
@@ -99,25 +100,22 @@ router.get('/racha', verificarToken, async (req, res) => {
   }
 });
 
-// OPTIMIZACIÓN: Estadísticas semanales con una sola consulta a MongoDB (Aggregation)
+// Obtener las estadísticas de los últimos 7 días (con zona horaria y filtro)
 router.get('/semana', verificarToken, async (req, res) => {
   try {
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999);
-    const hace7Dias = new Date();
-    hace7Dias.setDate(hace7Dias.getDate() - 6);
-    hace7Dias.setHours(0, 0, 0, 0);
+    const desde = new Date(Date.now() - 8 * DIA_MS); // margen de seguridad
 
     const stats = await Registro.aggregate([
       {
         $match: {
           usuario_id: new mongoose.Types.ObjectId(req.usuario.id),
-          fecha: { $gte: hace7Dias, $lte: hoy }
+          completado: true,
+          fecha: { $gte: desde }
         }
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$fecha" } },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$fecha', timezone: TZ } },
           completados: { $sum: 1 }
         }
       }
@@ -127,18 +125,16 @@ router.get('/semana', verificarToken, async (req, res) => {
     const resultado = [];
     
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const fechaStr = d.toISOString().split('T')[0];
-      const encontrado = stats.find(s => s._id === fechaStr);
+      const fechaStr = fmtDia(new Date(Date.now() - i * DIA_MS));
+      const encontrado = stats.find((s) => s._id === fechaStr);
       
       resultado.push({
-        dia: diasSemana[d.getDay()],
+        dia: diasSemana[new Date(`${fechaStr}T12:00:00Z`).getUTCDay()],
         fecha: fechaStr,
         completados: encontrado ? encontrado.completados : 0
       });
     }
-
+    
     res.json(resultado);
   } catch (error) {
     console.error(error);
@@ -163,43 +159,6 @@ router.get('/nivel', verificarToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al calcular el nivel' });
-  }
-});
-
-// NUEVO: Calcular el porcentaje de éxito semanal
-router.get('/exito', verificarToken, async (req, res) => {
-  try {
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999);
-    const hace7Dias = new Date();
-    hace7Dias.setDate(hace7Dias.getDate() - 6);
-    hace7Dias.setHours(0, 0, 0, 0);
-
-    // Registros completados en los últimos 7 días
-    const registros = await Registro.find({
-      usuario_id: req.usuario.id,
-      fecha: { $gte: hace7Dias, $lte: hoy }
-    });
-
-    // Hábitos activos del usuario
-    const habitosActivos = await Habito.find({ usuario_id: req.usuario.id, activo: true });
-
-    // Cálculo del total esperado (Hábitos activos * 7 días)
-    const totalEsperado = habitosActivos.length * 7;
-
-    if (totalEsperado === 0) {
-      return res.json({ porcentaje: 0, completados: 0, totalEsperado: 0 });
-    }
-
-    const totalCompletados = registros.length;
-    
-    let porcentaje = Math.round((totalCompletados / totalEsperado) * 100);
-    if (porcentaje > 100) porcentaje = 100;
-
-    res.json({ porcentaje, completados: totalCompletados, totalEsperado });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al calcular el éxito' });
   }
 });
 

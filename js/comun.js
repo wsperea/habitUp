@@ -1,5 +1,4 @@
 export async function inicializarApp() {
-  // 1. Aplicar tema guardado
   const temaGuardado = localStorage.getItem('tema');
   if (temaGuardado === 'claro') {
     document.body.classList.add('light-mode');
@@ -7,32 +6,20 @@ export async function inicializarApp() {
     if (themeLabel) themeLabel.textContent = 'Modo claro ›';
   }
 
+  let data;
   try {
     const res = await fetch('/api/auth/me');
     if (!res.ok) throw new Error('No autorizado');
-    const data = await res.json();
-    
-    const avatar = document.querySelector('[data-ui="user-avatar"]');
-    if (avatar) avatar.textContent = data.usuario.nombre.substring(0, 2).toUpperCase();
-
-    const greeting = document.querySelector('[data-ui="greeting"]');
-    if (greeting) greeting.textContent = `Buenos días, ${data.usuario.nombre}`;
-
-    const resNivel = await fetch('/api/registros/nivel');
-    if (resNivel.ok) {
-      const nivelData = await resNivel.json();
-      const nivelEl = document.getElementById('sidebar-nivel');
-      const xpEl = document.getElementById('sidebar-xp');
-      const xpBar = document.getElementById('sidebar-xpbar');
-      
-      if (nivelEl) nivelEl.textContent = `Nivel ${nivelData.nivel}`;
-      if (xpEl) xpEl.textContent = `${nivelData.xpTotal} / ${nivelData.nivel * 500} XP`;
-      if (xpBar) xpBar.style.width = `${(nivelData.xpActualNivel / nivelData.xpSiguienteNivel) * 100}%`;
-    }
-
+    data = await res.json();
   } catch (error) {
     window.location.href = '/login.html';
+    return;
   }
+
+  const avatar = document.querySelector('[data-ui="user-avatar"]');
+  if (avatar) avatar.textContent = data.usuario.nombre.substring(0, 2).toUpperCase();
+  const greeting = document.querySelector('[data-ui="greeting"]');
+  if (greeting) greeting.textContent = `Buenos días, ${data.usuario.nombre}`;
 }
 
 export async function cerrarSesion() {
