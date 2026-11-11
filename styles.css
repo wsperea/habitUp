@@ -101,67 +101,117 @@ img,svg{max-width:100%}
 
 /* ===== MODO CLARO ===== */
 body.light-mode {
-  background: radial-gradient(900px 500px at 60% 0, #E0E7FF, #F3F4F6 70%) #F3F4F6 !important;
-  color: #111827 !important;
+  --lm-bg: #DDE6F7;
+  --lm-card: #FFFFFF;
+  --lm-border: #C5D1EC;
+  --lm-text: #14204A;
+  --lm-muted: #55648C;
+  --lm-track: #D3DDF3;
+  --lm-accent: #2F5BFF;
+  background: radial-gradient(900px 500px at 60% 0, #EEF3FF, #DDE6F7 70%) #DDE6F7 !important;
+  color: var(--lm-text) !important;
 }
 
-body.light-mode .c {
-  background: linear-gradient(160deg, #FFFFFF, #F9FAFB) !important;
-  border-color: #E5E7EB !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
-}
-
+/* Barra lateral: blanca, separada del fondo por borde y sombra */
 body.light-mode .sb {
-  border-right-color: #E5E7EB !important;
-  background: #FFFFFF !important;
+  background: var(--lm-card) !important;
+  border-right: 1px solid var(--lm-border) !important;
+  box-shadow: 4px 0 16px -6px rgba(30, 60, 140, .15);
 }
-
-body.light-mode .n {
-  color: #4B5563 !important;
-}
-body.light-mode .n:hover {
-  background: #F3F4F6 !important;
-  color: #111827 !important;
-}
-body.light-mode .n.on {
-  background: #2F5BFF !important;
-  color: #FFFFFF !important;
-}
-
+body.light-mode .lg { color: var(--lm-text) !important; }
+body.light-mode .lg b { color: var(--lm-accent) !important; }
+body.light-mode .n { color: #44527A !important; }
+body.light-mode .n:hover { background: #EAF0FF !important; color: var(--lm-accent) !important; }
+body.light-mode .n.on { background: var(--lm-accent) !important; color: #fff !important; }
 body.light-mode .lv {
-  background: #F9FAFB !important;
-  border-color: #E5E7EB !important;
-  color: #4B5563 !important;
+  background: #EEF3FF !important;
+  border: 1px solid var(--lm-border) !important;
+  color: var(--lm-muted) !important;
 }
-body.light-mode .lv b { color: #111827 !important; }
-body.light-mode .bar { background: #E5E7EB !important; }
+body.light-mode .lv b { color: var(--lm-text) !important; }
 
-body.light-mode .sub,
-body.light-mode .mu,
-body.light-mode h2 {
-  color: #6B7280 !important;
+/* Tarjetas: blancas, con borde azulado y sombra visible */
+body.light-mode .c {
+  background: var(--lm-card) !important;
+  border: 1px solid var(--lm-border) !important;
+  box-shadow: 0 6px 18px -6px rgba(30, 60, 140, .22), 0 1px 3px rgba(30, 60, 140, .10) !important;
 }
 
+/* Textos */
 body.light-mode h1,
 body.light-mode .sm,
-body.light-mode .big {
-  color: #111827 !important;
-}
+body.light-mode .big,
+body.light-mode b { color: var(--lm-text) !important; }
+body.light-mode h2 { color: #3E4E7C !important; }
+body.light-mode .sub,
+body.light-mode .mu { color: var(--lm-muted) !important; }
+body.light-mode .lk { color: var(--lm-accent) !important; }
 
-body.light-mode .f input {
-  background: #FFFFFF !important;
-  border-color: #D1D5DB !important;
-  color: #111827 !important;
+/* Barras, anillos y gráficas */
+body.light-mode .bar { background: var(--lm-track) !important; }
+body.light-mode .bar u { background: var(--lm-accent) !important; }
+body.light-mode circle[stroke="#22305E"] { stroke: var(--lm-track) !important; }
+body.light-mode svg text { fill: var(--lm-text) !important; }
+/* Días sin hábitos (color en línea desde el JS) */
+body.light-mode .wk i[style*="22305E"],
+body.light-mode .wk i[style*="rgb(34, 48, 94)"],
+body.light-mode #grafico-semana div[style*="22305E"] { background: var(--lm-track) !important; }
+/* Días con hábitos */
+body.light-mode .wk i[style*="7FA2FF"],
+body.light-mode .wk i[style*="rgb(127, 162, 255)"],
+body.light-mode #grafico-semana div[style*="7FA2FF"] { background: var(--lm-accent) !important; }
+/* Números sobre las barras de Seguimiento (eran blancos) */
+body.light-mode #grafico-semana span { color: var(--lm-text) !important; }
+body.light-mode #grafico-semana div[style*="8892B0"] { color: var(--lm-muted) !important; }
+
+/* Días, interruptores, insignias */
+body.light-mode .d { background: var(--lm-track); color: var(--lm-muted); }
+body.light-mode .tg i { background: #B7C4E6; }
+body.light-mode .tg input:checked + i { background: var(--lm-accent); }
+
+/* Botones */
+body.light-mode .btn { color: #fff !important; }
+body.light-mode .ghost {
+  background: #fff !important;
+  border: 1px solid #AFC0E6 !important;
+  color: var(--lm-accent) !important;
+}
+body.light-mode .ghost:hover { background: #EAF0FF !important; }
+body.light-mode .t { color: #44527A !important; }
+body.light-mode .t.on { background: var(--lm-accent) !important; color: #fff !important; }
+body.light-mode .av { color: #fff !important; }
+
+/* Filas de configuración */
+body.light-mode .li { border-top: 1px solid var(--lm-border) !important; color: var(--lm-text) !important; }
+
+/* Formularios (incluye el selector de hora de Perfil) */
+body.light-mode .f input,
+body.light-mode .sel,
+body.light-mode input[type="time"],
+body.light-mode .modal-content input {
+  background: #fff !important;
+  color: var(--lm-text) !important;
+  border: 1px solid #AFC0E6 !important;
   box-shadow: none !important;
 }
+body.light-mode .f label { color: var(--lm-muted) !important; }
 
-body.light-mode .li { border-color: #E5E7EB !important; color: #111827 !important; }
-body.light-mode .sel { background: #FFFFFF !important; color: #111827 !important; border-color: #D1D5DB !important; }
-body.light-mode .t { color: #4B5563 !important; }
-body.light-mode .t.on { background: #2F5BFF !important; color: #FFFFFF !important; }
-body.light-mode .ghost { border-color: #D1D5DB !important; color: #111827 !important; }
-body.light-mode .ghost:hover { background: #F3F4F6 !important; }
-body.light-mode .av { color: #FFFFFF !important; }
+/* Ventana "Editar perfil" */
+body.light-mode .modal-overlay { background: rgba(20, 32, 74, .35) !important; }
+body.light-mode .modal-content {
+  background: #fff !important;
+  border: 1px solid var(--lm-border) !important;
+  box-shadow: 0 16px 40px rgba(30, 60, 140, .25) !important;
+}
+
+/* Móvil: la barra lateral queda arriba, con línea inferior */
+@media (max-width: 820px) {
+  body.light-mode .sb {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--lm-border) !important;
+    box-shadow: 0 4px 12px -6px rgba(30, 60, 140, .2);
+  }
+}
 
 /* ===== AVATAR ANIMADO ===== */
 .avatar-wrap { width: 100%; max-width: 300px; margin: 0 auto; cursor: pointer; }
