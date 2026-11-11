@@ -64,7 +64,15 @@ export async function inicializarApp() {
   if (avatar) avatar.textContent = data.usuario.nombre.substring(0, 2).toUpperCase();
 
   const greeting = document.querySelector('[data-ui="greeting"]');
-  if (greeting) greeting.textContent = `Buenos días, ${data.usuario.nombre}`;
+  if (greeting) {
+    const h = new Date().getHours();
+    const nombre = data.usuario.nombre;
+    const saludo =
+      h < 12 ? `Buenos días, ${nombre}` :
+      h < 19 ? `Buenas tardes, ${nombre}` :
+               `Buenas noches, ${nombre}`;
+    greeting.textContent = saludo;
+  }
 
   await cargarSidebarNivel();
 }
