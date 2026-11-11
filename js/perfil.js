@@ -23,6 +23,7 @@ async function cargarPerfil() {
     document.querySelector('[data-ui="profile-avatar"]').textContent = iniciales;
     document.getElementById('inputNombre').value = user.nombre;
 
+    // Cargar Estadísticas
     const resRacha = await fetch('/api/registros/racha');
     const dataRacha = await resRacha.json();
     document.querySelector('[data-ui="stat-streak"]').textContent = dataRacha.racha;
@@ -64,3 +65,14 @@ document.getElementById('formPerfil').addEventListener('submit', async (e) => {
 });
 
 cargarPerfil();
+
+// Notificaciones
+import('./notificaciones.js')
+  .then((m) => m.vincularControles({
+    enlace: document.getElementById('btn-notificaciones'),
+    etiqueta: document.getElementById('notif-etiqueta'),
+    hora: document.getElementById('notif-hora'),
+    probar: document.getElementById('notif-probar'),
+    estado: document.getElementById('notif-estado')
+  }))
+  .catch((e) => console.warn('Notificaciones no disponibles:', e));

@@ -52,9 +52,18 @@
 <div><div class="big" data-ui="stat-xp">0</div><div class="mu">Total de XP</div></div>
 </div>
 </section>
+
 <section class="c" style="padding-bottom:10px">
 <h2>Configuración</h2>
-<a class="li" href="#" data-action="toggle-notifications">Notificaciones<span>›</span></a>
+<a class="li" href="#" id="btn-notificaciones" data-action="toggle-notifications">Notificaciones<span class="mu" id="notif-etiqueta">Desactivadas ›</span></a>
+<div class="li" style="cursor:default">
+  <label for="notif-hora">Hora del recordatorio</label>
+  <span style="display:flex;gap:10px;align-items:center">
+    <input type="time" id="notif-hora" value="20:00" style="background:#0F1523;border:1px solid #2A3B5C;border-radius:8px;color:#fff;padding:6px 8px;font-family:'Inter',sans-serif">
+    <button class="ghost" type="button" id="notif-probar">Probar</button>
+  </span>
+</div>
+<p class="mu cp" id="notif-estado" style="margin:4px 0 10px"></p>
 <a class="li" href="#" id="btn-cambiar-tema" data-action="toggle-theme">Tema<span class="mu" data-ui="theme-label">Modo oscuro ›</span></a>
 <a class="li" href="#" id="btn-cerrar-sesion-perfil">Cerrar sesión<span>›</span></a>
 </section>
@@ -77,7 +86,7 @@
   </div>
 </div>
 
-<script type="module" src="js/perfil.js"></script>
+<script type="module" src="js/perfil.js?v=2"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
