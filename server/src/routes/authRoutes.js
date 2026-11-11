@@ -10,28 +10,17 @@ const router = Router();
 router.post('/register', async (req, res) => {
   try {
     const { nombre, correo, password } = req.body;
-    
-    // Validaciones de servidor
-    if (!nombre || !correo || !password) {
-      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
-    }
+    if (!nombre || !correo || !password) return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    if (password.length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(correo)) {
-      return res.status(400).json({ error: 'El formato del correo no es válido' });
-    }
+    if (!emailRegex.test(correo)) return res.status(400).json({ error: 'El formato del correo no es válido' });
 
-    // Validar que no exista
     const existe = await Usuario.findOne({ correo });
     if (existe) return res.status(400).json({ error: 'El correo ya está registrado' });
 
-    // Encriptar contraseña
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    // Guardar usuario
     const nuevoUsuario = new Usuario({ nombre, correo, password: hashPassword });
     await nuevoUsuario.save();
 
@@ -46,7 +35,6 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { correo, password } = req.body;
-    
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) return res.status(400).json({ error: 'Credenciales incorrectas' });
 
@@ -62,7 +50,7 @@ router.post('/login', async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.json({ mensaje: 'Login exitoso', usuario: { nombre: usuario.nombre } });
@@ -95,21 +83,47 @@ router.get('/perfil', verificarToken, async (req, res) => {
   }
 });
 
-// Ruta: Actualizar nombre del perfil
+// Ruta: Actualizar perfil (nombre y correo)
 router.put('/perfil', verificarToken, async (req, res) => {
   try {
-    const { nombre } = req.body;
+    const nombre = String(req.body.nombre ?? '').trim();
+    const correo = String(req.body.correo ?? '').trim();
+
     if (!nombre) return res.status(400).json({ error: 'El nombre es obligatorio' });
+    if (!correo) return res.status(400).json({ error: 'El correo es obligatorio' });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo)) {
+      return res.status(400).json({ error: 'El formato del correo no es válido' });
+    }
+
+    const existe = await Usuario.findOne({ correo, _id: { $ne: req.usuario.id } });
+    if (existe) return res.status(409).json({ error: 'Ese correo ya está en uso' });
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       req.usuario.id,
-      { nombre },
-      { new: true }
+      { nombre, correo },
+      { new: true, runValidators: true }
     ).select('-password');
+
+    if (!usuarioActualizado) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    // Reemitir el token para que /me devuelva el nombre nuevo
+    const token = jwt.sign(
+      { id: usuarioActualizado._id, nombre: usuarioActualizado.nombre },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES || '7d' }
+    );
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.json({ mensaje: 'Perfil actualizado', usuario: usuarioActualizado });
   } catch (error) {
     console.error(error);
+    if (error.code === 11000) return res.status(409).json({ error: 'Ese correo ya está en uso' });
     res.status(500).json({ error: 'Error al actualizar el perfil' });
   }
 });

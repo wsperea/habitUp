@@ -4,6 +4,22 @@ async function pedirJson(url) {
   return res.json();
 }
 
+function vincularNavegacion() {
+  const ir = (el, destino, etiqueta) => {
+    if (!el) return;
+    el.style.cursor = 'pointer';
+    el.setAttribute('role', 'link');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', etiqueta);
+    el.addEventListener('click', () => { window.location.href = destino; });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = destino; }
+    });
+  };
+  ir(document.querySelector('.sb .lg'), 'index.html', 'Ir al inicio');
+  ir(document.querySelector('header [data-ui="user-avatar"]'), 'perfil.html', 'Ir a mi perfil');
+}
+
 export async function cargarSidebarNivel() {
   try {
     const d = await pedirJson('/api/registros/nivel');
@@ -25,6 +41,8 @@ export async function cargarSidebarNivel() {
 }
 
 export async function inicializarApp() {
+  vincularNavegacion();
+
   const temaGuardado = localStorage.getItem('tema');
   if (temaGuardado === 'claro') {
     document.body.classList.add('light-mode');
